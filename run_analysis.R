@@ -1,0 +1,33 @@
+run_analysis <- function(){
+  suppressMessages(library(tidyr))
+  suppressMessages(library(dplyr))
+  setwd("train")
+  temp <- read.table("subject_train.txt")
+  dat <- tbl_df(temp)
+  temp <- read.table("y_train.txt")
+  dat <- mutate(dat, y_train=temp[,1])
+  tempTwo <- read.table("X_train.txt")
+  dat <- cbind(dat, tempTwo)
+  setwd("../")
+  setwd("test")
+  temp <- read.table("subject_test.txt")
+  tempTwo <- read.table("y_test.txt")
+  temp <- cbind(temp, tempTwo)
+  tempTwo <- read.table("X_test.txt")
+  temp <- cbind(temp, tempTwo)
+  colnames(temp) <- colnames(dat)
+  dat <- rbind(dat, temp)
+  dat <- tbl_df(dat)
+  dat <- arrange(dat, dat[,1])
+  setwd("../")
+  labels <- read.table("features.txt")
+  names <- c("subject", "y", as.character(labels[1:561,2]))
+  colnames(dat) <- names
+  meanosd <- labels[grepl("std",labels[,2],ignore.case=TRUE) | grepl("mean",labels[,2],ignore.case=TRUE),1]
+  meanosd <- meanosd+2
+  meanosd <- c(1,2,meanosd)
+  dat <- select(dat, meanosd)
+  activities <- read.table("activity_labels.txt")
+  dat <- mutate(dat, y=activities[y,2])
+  write.table(dat, "motion_data.txt", row.names=FALSE)
+}
